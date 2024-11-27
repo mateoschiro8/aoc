@@ -1,2 +1,1 @@
-# aoc
-Soluciones a los problemas de Advent of Code
+Usando los desafíos del Advent of Code para aprender GO
