@@ -80,9 +80,11 @@ func isNearSymbol(schem [][]rune, row, startPos, lastPos, number int, gears map[
 			for j := pos - 1; j <= pos+1; j++ {
 
 				if i >= 0 && j >= 0 && i < len(schem) && j < len(schem[0]) && !unicode.IsNumber(schem[i][j]) && schem[i][j] != '.' {
+
 					if schem[i][j] == '*' {
 						gears[string(i)+string(j)] = append(gears[string(i)+string(j)], number)
 					}
+
 					return true
 				}
 			}
