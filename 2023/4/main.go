@@ -33,8 +33,7 @@ func main() {
 	}
 
 	for i, card := range input {
-		p1 := pointsForCard(card, i, counts)
-		sum1 += p1
+		sum1 += pointsForCard(card, i, counts)
 		sum2 += counts[i]
 	}
 
