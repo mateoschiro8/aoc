@@ -1,1 +1,1 @@
-Usando los desafíos del Advent of Code para aprender GO
+Mis soluciones al [Advent of Code](https://adventofcode.com/), utilizando GO
