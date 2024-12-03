@@ -53,8 +53,8 @@ More of the above example's reports are now safe:
 -   `7 6 4 2 1`: _Safe_ without removing any level.
 -   `1 2 7 8 9`: _Unsafe_ regardless of which level is removed.
 -   `9 7 6 2 1`: _Unsafe_ regardless of which level is removed.
--   `1 _3_ 2 4 5`: _Safe_ by removing the second level, `3`.
--   `8 6 _4_ 4 1`: _Safe_ by removing the third level, `4`.
+-   `1 3 2 4 5`: _Safe_ by removing the second level, `3`.
+-   `8 6 4 4 1`: _Safe_ by removing the third level, `4`.
 -   `1 3 6 7 9`: _Safe_ without removing any level.
 
 Thanks to the Problem Dampener, `4` reports are actually _safe_!
