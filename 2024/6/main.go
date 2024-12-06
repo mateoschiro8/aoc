@@ -6,10 +6,9 @@ import (
 	"os"
 )
 
-type Dir struct {
-	heading int // 1 arriba, 2 derecha, 3 abajo, 4 izquierda
-	x       int
-	y       int
+type Point struct {
+	x int
+	y int
 }
 
 func main() {
@@ -30,96 +29,84 @@ func main() {
 	}
 	readFile.Close()
 
-	sum1, sum2 = countSteps(input)
+	res := make([][]byte, len(input))
+	for i, str := range input {
+		res[i] = []byte(str)
+	}
+	sum1, sum2 = countSteps(res)
 
 	fmt.Println("Primera parte:", sum1)
 	fmt.Println("Segunda parte:", sum2)
 }
 
-func countSteps(input []string) (int, int) {
+func countSteps(input [][]byte) (int, int) {
 
-	var sum1, sum2, startI, startJ, a int
+	var sum1, sum2, startI, startJ int
 
 	pos := make([][]int, len(input))
-	obs := make([][]int, len(input))
 
 	for i, v := range input {
 
 		pos[i] = make([]int, len(v))
-		obs[i] = make([]int, len(v))
 
 		for j := range v {
 			if input[i][j] == '^' {
 				startI, startJ = i, j
 			}
-
-		}
-
-	}
-
-	// step(input, startI, startJ, Dir{heading: 1, x: -1, y: 0}, pos, obs, &a)
-	for i, v := range pos {
-		// fmt.Println(v)
-		for j := range v {
-			sum1 += pos[i][j]
 		}
 	}
 
-	for i, v := range input {
-		tmp := v
-		for j := range v {
-			if input[i][j] != '^' {
-				temp := []byte(v)
-				temp[j] = '#'
-				input[i] = string(temp)
-				step(input, startI, startJ, Dir{heading: 1, x: -1, y: 0}, pos, obs, &a)
-				input[i] = tmp
-				if a > 0 {
-					sum2++
-				}
-				a = 0
-				for i1, v1 := range obs {
-					for i2 := range v1 {
-						obs[i1][i2] = 0
-					}
+	sum1 = step(input, startI, startJ, 1, Point{x: -1, y: 0}, pos)
+	/*
+		for i, v := range input {
+			for j := range v {
+				if input[i][j] != '^' {
+					tmp1 := input[i][j]
+					input[i][j] = '#'
+					step(input, startI, startJ, 1, Point{x: -1, y: 0}, pos)
+					input[i][j] = tmp1
 				}
 			}
 		}
-	}
-
+	*/
 	return sum1, sum2
 }
 
-func step(input []string, i, j int, dir Dir, pos [][]int, obs [][]int, a *int) {
+// 1 arriba, 2 derecha, 3 abajo, 4 izquierda
+func step(input [][]byte, i, j, heading int, dir Point, pos [][]int) int {
 
+	/*
+		for _, v := range input {
+			fmt.Println(string(v))
+		}
+		fmt.Println()
+	*/
 	if !inBounds(input, i, j) {
-		return
+		return 0
 	}
 
 	if input[i][j] == '#' {
-		if obs[i][j] == 1 {
-			// fmt.Println("obstaculo visto dos veces", i, j)
-			*a = 1
-			return
-		} else {
-			obs[i][j] = 1
-		}
-		switch dir.heading {
+		switch heading {
 		case 1:
-			step(input, i+1, j+1, Dir{heading: 2, x: 0, y: 1}, pos, obs, a)
+			return step(input, i+1, j+1, 2, Point{x: 0, y: 1}, pos)
 		case 2:
-			step(input, i+1, j-1, Dir{heading: 3, x: 1, y: 0}, pos, obs, a)
+			return step(input, i+1, j-1, 3, Point{x: 1, y: 0}, pos)
 		case 3:
-			step(input, i-1, j-1, Dir{heading: 4, x: 0, y: -1}, pos, obs, a)
+			return step(input, i-1, j-1, 4, Point{x: 0, y: -1}, pos)
 		case 4:
-			step(input, i-1, j+1, Dir{heading: 1, x: -1, y: 0}, pos, obs, a)
+			return step(input, i-1, j+1, 1, Point{x: -1, y: 0}, pos)
 		}
 	} else {
-		pos[i][j] = 1
-		step(input, i+dir.x, j+dir.y, dir, pos, obs, a)
+		if pos[i][j] == 1 {
+			return step(input, i+dir.x, j+dir.y, heading, dir, pos)
+		} else {
+			pos[i][j] = 1
+			return 1 + step(input, i+dir.x, j+dir.y, heading, dir, pos)
+		}
 	}
+	return 0
 }
 
-func inBounds(input []string, i, j int) bool {
+func inBounds(input [][]byte, i, j int) bool {
 	return 0 <= i && i < len(input) && 0 <= j && j < len(input[0])
 }
