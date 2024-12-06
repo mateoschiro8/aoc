@@ -4,16 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
 )
 
 type Point struct {
-	x int
-	y int
+	dir int
+	x   int
+	y   int
 }
 
 func main() {
 
-	readFile, err := os.Open("data.txt")
+	readFile, err := os.Open("input.txt")
 
 	if err != nil {
 		fmt.Println(err)
@@ -42,13 +44,9 @@ func main() {
 func countSteps(input [][]byte) (int, int) {
 
 	var sum1, sum2, startI, startJ int
-
-	pos := make([][]int, len(input))
+	var pos1 []Point
 
 	for i, v := range input {
-
-		pos[i] = make([]int, len(v))
-
 		for j := range v {
 			if input[i][j] == '^' {
 				startI, startJ = i, j
@@ -56,55 +54,60 @@ func countSteps(input [][]byte) (int, int) {
 		}
 	}
 
-	sum1 = step(input, startI, startJ, 1, Point{x: -1, y: 0}, pos)
-	/*
-		for i, v := range input {
-			for j := range v {
-				if input[i][j] != '^' {
-					tmp1 := input[i][j]
-					input[i][j] = '#'
-					step(input, startI, startJ, 1, Point{x: -1, y: 0}, pos)
-					input[i][j] = tmp1
-				}
+	step(input, startI, startJ, Point{dir: 1, x: -1, y: 0}, &pos1, true)
+	sum1 = len(pos1)
+
+	for _, v := range pos1 {
+		i, j := v.x, v.y
+		if input[i][j] != '^' {
+			var pos2 []Point
+			tmp1 := input[i][j]
+			input[i][j] = '#'
+			step(input, startI, startJ, Point{dir: 1, x: -1, y: 0}, &pos2, false)
+			input[i][j] = tmp1
+			if len(pos2) == 0 {
+				sum2++
 			}
 		}
-	*/
+
+	}
+
 	return sum1, sum2
 }
 
 // 1 arriba, 2 derecha, 3 abajo, 4 izquierda
-func step(input [][]byte, i, j, heading int, dir Point, pos [][]int) int {
+func step(input [][]byte, i, j int, point Point, pos *[]Point, w bool) {
 
-	/*
-		for _, v := range input {
-			fmt.Println(string(v))
-		}
-		fmt.Println()
-	*/
 	if !inBounds(input, i, j) {
-		return 0
+		return
 	}
 
 	if input[i][j] == '#' {
-		switch heading {
+		switch point.dir {
 		case 1:
-			return step(input, i+1, j+1, 2, Point{x: 0, y: 1}, pos)
+			step(input, i+1, j+1, Point{dir: 2, x: 0, y: 1}, pos, w)
 		case 2:
-			return step(input, i+1, j-1, 3, Point{x: 1, y: 0}, pos)
+			step(input, i+1, j-1, Point{dir: 3, x: 1, y: 0}, pos, w)
 		case 3:
-			return step(input, i-1, j-1, 4, Point{x: 0, y: -1}, pos)
+			step(input, i-1, j-1, Point{dir: 4, x: 0, y: -1}, pos, w)
 		case 4:
-			return step(input, i-1, j+1, 1, Point{x: -1, y: 0}, pos)
+			step(input, i-1, j+1, Point{dir: 1, x: -1, y: 0}, pos, w)
 		}
 	} else {
-		if pos[i][j] == 1 {
-			return step(input, i+dir.x, j+dir.y, heading, dir, pos)
+		p := Point{point.dir, i, j}
+		if w {
+			if !slices.ContainsFunc(*pos, func(p1 Point) bool { return p1.x == p.x && p1.y == p.y }) {
+				*pos = append(*pos, p)
+			}
 		} else {
-			pos[i][j] = 1
-			return 1 + step(input, i+dir.x, j+dir.y, heading, dir, pos)
+			if slices.Contains(*pos, p) {
+				*pos = slices.Delete(*pos, 0, len(*pos))
+				return
+			}
+			*pos = append(*pos, p)
 		}
+		step(input, i+point.x, j+point.y, point, pos, w)
 	}
-	return 0
 }
 
 func inBounds(input [][]byte, i, j int) bool {
